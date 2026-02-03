@@ -96,7 +96,10 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error' });
+    if (error.code === 'ECONNREFUSED' || error.code === 'ER_ACCESS_DENIED_ERROR' || error.code === 'PROTOCOL_CONNECTION_LOST') {
+      return res.status(503).json({ message: 'Database connection failed. Please start MySQL (e.g. XAMPP).' });
+    }
+    res.status(500).json({ message: error.message || 'Server error' });
   }
 });
 

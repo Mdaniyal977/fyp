@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, { email, password });
+      const response = await axios.post(`${API_URL}/auth/login`, { email, password }, { timeout: 10000 });
       const { token: newToken, user: userData } = response.data;
       setToken(newToken);
       setUser(userData);
@@ -42,10 +42,17 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
       return { success: true };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Login failed'
-      };
+      let message = 'Login failed';
+      if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+        message = 'Server not reachable. Check: 1) Backend running (npm run server) 2) On Vercel, set REACT_APP_API_URL to your backend URL';
+      } else if (error.code === 'ECONNABORTED') {
+        message = 'Request timeout. Server is slow or not running.';
+      } else if (error.response?.status === 400 && error.response?.data?.message) {
+        message = error.response.data.message;
+      } else if (error.response?.data?.message) {
+        message = error.response.data.message;
+      }
+      return { success: false, message };
     }
   };
 
@@ -64,11 +71,15 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error('Registration error:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
-      return {
-        success: false,
-        message: errorMessage
-      };
+      let errorMessage = 'Registration failed';
+      if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+        errorMessage = 'Server not reachable. Check: 1) Backend running (npm run server) 2) On Vercel, set REACT_APP_API_URL to your backend URL';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      return { success: false, message: errorMessage };
     }
   };
 
