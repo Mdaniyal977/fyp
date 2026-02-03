@@ -16,16 +16,13 @@ import {
   AccordionSummary,
   AccordionDetails,
   Button,
-  Divider,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PaletteIcon from '@mui/icons-material/Palette';
 import FormatSizeIcon from '@mui/icons-material/FormatSize';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
-import ImageIcon from '@mui/icons-material/Image';
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
-import DensityMediumIcon from '@mui/icons-material/DensityMedium';
 
 const fonts = [
   'Inter',

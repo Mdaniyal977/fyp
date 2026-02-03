@@ -12,38 +12,25 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Chip,
   AppBar,
   Toolbar,
-  Alert,
   CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Switch,
   FormControlLabel,
   InputLabel,
   Select,
   MenuItem,
   FormControl,
-  LinearProgress
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SaveIcon from '@mui/icons-material/Save';
-import MicIcon from '@mui/icons-material/Mic';
-import StopIcon from '@mui/icons-material/Stop';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import AddIcon from '@mui/icons-material/Add';
 import PreviewIcon from '@mui/icons-material/Preview';
 import PaletteIcon from '@mui/icons-material/Palette';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import PersonIcon from '@mui/icons-material/Person';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-import SpeechRecognition from 'react-speech-recognition';
 import VoiceInput from '../components/VoiceInput';
 import AISuggestions from '../components/AISuggestions';
 import CVTemplateSelector from '../components/CVTemplateSelector';
@@ -133,6 +120,7 @@ const CVEditor = () => {
     if (id) {
       fetchCV();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchCV = async () => {

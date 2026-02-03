@@ -224,7 +224,7 @@ const TemplatePreview = ({ template }) => {
       </Box>
     ),
     ats: (
-      <Box sx={{ p: 2, bgcolor: '#06b6d4', borderRadius: 1, height: '100%', bgcolor: 'white', border: '2px solid #06b6d4' }}>
+      <Box sx={{ p: 2, borderRadius: 1, height: '100%', bgcolor: 'white', border: '2px solid #06b6d4' }}>
         <Box sx={{ width: '100%', height: 10, bgcolor: '#06b6d4', mb: 1 }} />
         <Box sx={{ width: '100%', height: 4, bgcolor: '#e0f2fe', mb: 0.5 }} />
         <Box sx={{ width: '100%', height: 4, bgcolor: '#e0f2fe', mb: 0.5 }} />
@@ -271,7 +271,7 @@ const TemplatePreview = ({ template }) => {
       </Box>
     ),
     academic: (
-      <Box sx={{ p: 2, bgcolor: '#1e40af', borderRadius: 1, height: '100%', bgcolor: 'white', border: '2px solid #1e40af' }}>
+      <Box sx={{ p: 2, borderRadius: 1, height: '100%', bgcolor: 'white', border: '2px solid #1e40af' }}>
         <Box sx={{ width: '100%', height: 2, bgcolor: '#1e40af', mb: 1 }} />
         <Box sx={{ width: '60%', height: 8, bgcolor: '#1e40af', mx: 'auto', mb: 1 }} />
         <Box sx={{ width: '100%', height: 1, bgcolor: '#93c5fd', mb: 1 }} />
