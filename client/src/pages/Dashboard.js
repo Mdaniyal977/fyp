@@ -1,0 +1,379 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  Box,
+  AppBar,
+  Toolbar,
+  IconButton,
+  CircularProgress,
+  Chip,
+  Menu,
+  MenuItem,
+  Avatar,
+  Fab,
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+const Dashboard = () => {
+  const [cvs, setCvs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedCv, setSelectedCv] = useState(null);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchCVs();
+  }, []);
+
+  const fetchCVs = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/cv`);
+      setCvs(response.data);
+    } catch (error) {
+      console.error('Error fetching CVs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this CV?')) {
+      try {
+        await axios.delete(`${API_URL}/cv/${id}`);
+        setCvs(cvs.filter(cv => (cv.id || cv._id) !== id));
+      } catch (error) {
+        console.error('Error deleting CV:', error);
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to delete CV';
+        alert(`Failed to delete CV: ${errorMessage}`);
+      }
+    }
+    handleCloseMenu();
+  };
+
+  const handleDuplicate = async (cv) => {
+    try {
+      const cvData = { ...cv };
+      delete cvData.id;
+      delete cvData._id;
+      cvData.title = `${cv.title} (Copy)`;
+      const response = await axios.post(`${API_URL}/cv`, cvData);
+      fetchCVs();
+      navigate(`/cv/${response.data.id || response.data._id}`);
+    } catch (error) {
+      console.error('Error duplicating CV:', error);
+      alert('Failed to duplicate CV');
+    }
+    handleCloseMenu();
+  };
+
+  const handleMenuOpen = (event, cv) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedCv(cv);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+    setSelectedCv(null);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
+      <AppBar 
+        position="sticky" 
+        elevation={0}
+        sx={{ 
+          background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%)',
+          borderBottom: 'none',
+        }}
+      >
+        <Toolbar sx={{ px: { xs: 2, sm: 3 }, py: 1.5, minHeight: { xs: 56, sm: 64 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexGrow: 1 }}>
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: 2,
+                bgcolor: 'rgba(255,255,255,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontWeight: 800,
+                fontSize: '1.35rem',
+                boxShadow: 1,
+              }}
+            >
+              V
+            </Box>
+            <Typography 
+              variant="h6" 
+              component="div" 
+              sx={{ 
+                fontWeight: 700,
+                color: 'white',
+                letterSpacing: '-0.02em',
+                display: { xs: 'none', sm: 'block' }
+              }}
+            >
+              Voice CV Maker
+            </Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Chip
+              icon={<AccountCircleIcon sx={{ color: 'white !important' }} />}
+              label={user?.name || 'User'}
+              sx={{ 
+                display: { xs: 'none', sm: 'flex' },
+                bgcolor: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                fontWeight: 600,
+                '& .MuiChip-icon': { color: 'white' }
+              }}
+            />
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<LogoutIcon />}
+              onClick={handleLogout}
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.25)',
+                color: 'white',
+                fontWeight: 600,
+                px: 2,
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.35)' }
+              }}
+            >
+              Logout
+            </Button>
+          </Box>
+        </Toolbar>
+      </AppBar>
+
+      <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 4 }, px: { xs: 2, sm: 3 } }}>
+        <Box sx={{ mb: 4 }}>
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            fontWeight={700}
+            gutterBottom
+            sx={{ color: 'text.primary', letterSpacing: '-0.02em' }}
+          >
+            My CVs
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 560 }}>
+            Create and manage your professional CVs with voice input and AI assistance
+          </Typography>
+        </Box>
+
+        {cvs.length === 0 ? (
+          <Card
+            sx={{
+              textAlign: 'center',
+              p: 6,
+              bgcolor: 'white',
+              borderRadius: 3,
+              border: '2px dashed',
+              borderColor: 'divider',
+              boxShadow: 'none',
+            }}
+          >
+            <Box
+              sx={{
+                width: 88,
+                height: 88,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 3,
+              }}
+            >
+              <AddIcon sx={{ fontSize: 44, color: 'white' }} />
+            </Box>
+            <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'text.primary' }}>
+              No CVs yet
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Create your first professional CV with our easy-to-use editor
+            </Typography>
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<AddIcon />}
+              onClick={() => navigate('/cv/new')}
+              sx={{ px: 4, py: 1.5, borderRadius: 2, fontWeight: 600 }}
+            >
+              Create Your First CV
+            </Button>
+          </Card>
+        ) : (
+          <>
+            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => navigate('/cv/new')}
+                sx={{ 
+                  borderRadius: 2,
+                  px: 3,
+                  py: 1.25,
+                  fontWeight: 600,
+                  background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                  boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)',
+                  '&:hover': { background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)', boxShadow: '0 6px 20px rgba(99, 102, 241, 0.45)' }
+                }}
+              >
+                Create New CV
+              </Button>
+            </Box>
+            <Grid container spacing={3}>
+              {cvs.map((cv) => {
+                const cvId = cv.id || cv._id;
+                return (
+                  <Grid item xs={12} sm={6} md={4} key={cvId}>
+                    <Card
+                      sx={{
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        borderRadius: 3,
+                        overflow: 'hidden',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                        transition: 'all 0.25s ease',
+                        '&:hover': {
+                          transform: 'translateY(-6px)',
+                          boxShadow: '0 12px 40px rgba(99, 102, 241, 0.15)',
+                          borderColor: 'primary.light',
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          height: 6,
+                          background: 'linear-gradient(90deg, #6366f1 0%, #4f46e5 100%)',
+                        }}
+                      />
+                      <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                          <Typography variant="h6" fontWeight={700} sx={{ color: 'text.primary', pr: 1, lineHeight: 1.3 }}>
+                            {cv.title || 'Untitled CV'}
+                          </Typography>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => handleMenuOpen(e, cv)}
+                            sx={{ color: 'text.secondary', '&:hover': { bgcolor: 'action.hover' } }}
+                          >
+                            <MoreVertIcon />
+                          </IconButton>
+                        </Box>
+                        <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
+                          Updated {new Date(cv.updatedAt).toLocaleDateString()}
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+                          {cv.personalInfo?.fullName && (
+                            <Chip label={cv.personalInfo.fullName} size="small" variant="outlined" sx={{ borderRadius: 1.5 }} />
+                          )}
+                          {cv.personalInfo?.jobTitle && (
+                            <Chip label={cv.personalInfo.jobTitle} size="small" sx={{ borderRadius: 1.5, bgcolor: 'primary.light', color: 'primary.dark' }} />
+                          )}
+                        </Box>
+                      </CardContent>
+                      <CardActions sx={{ p: 2, pt: 0 }}>
+                        <Button
+                          size="small"
+                          startIcon={<EditIcon />}
+                          onClick={() => navigate(`/cv/${cvId}`)}
+                          fullWidth
+                          variant="contained"
+                          sx={{ borderRadius: 2, py: 1, fontWeight: 600 }}
+                        >
+                          Edit CV
+                        </Button>
+                      </CardActions>
+                    </Card>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          </>
+        )}
+      </Container>
+
+      {/* Floating Action Button for Mobile */}
+      <Fab
+        color="primary"
+        aria-label="add"
+        sx={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          display: { xs: 'flex', sm: 'none' },
+        }}
+        onClick={() => navigate('/cv/new')}
+      >
+        <AddIcon />
+      </Fab>
+
+      {/* Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleCloseMenu}
+      >
+        <MenuItem onClick={() => selectedCv && navigate(`/cv/${selectedCv.id || selectedCv._id}`)}>
+          <EditIcon sx={{ mr: 2 }} fontSize="small" />
+          Edit
+        </MenuItem>
+        <MenuItem onClick={() => selectedCv && handleDuplicate(selectedCv)}>
+          <FileCopyIcon sx={{ mr: 2 }} fontSize="small" />
+          Duplicate
+        </MenuItem>
+        <MenuItem 
+          onClick={() => selectedCv && handleDelete(selectedCv.id || selectedCv._id)}
+          sx={{ color: 'error.main' }}
+        >
+          <DeleteIcon sx={{ mr: 2 }} fontSize="small" />
+          Delete
+        </MenuItem>
+      </Menu>
+    </Box>
+  );
+};
+
+export default Dashboard;

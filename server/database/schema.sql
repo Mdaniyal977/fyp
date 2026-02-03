@@ -1,0 +1,32 @@
+-- Create database
+CREATE DATABASE IF NOT EXISTS voice_cv_maker;
+USE voice_cv_maker;
+
+-- Users table
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- CVs table
+CREATE TABLE IF NOT EXISTS cvs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  userId INT NOT NULL,
+  title VARCHAR(255) DEFAULT 'My CV',
+  personalInfo JSON,
+  professionalSummary TEXT,
+  workExperience JSON,
+  education JSON,
+  skills JSON,
+  certifications JSON,
+  languages JSON,
+  projects JSON,
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_userId (userId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
