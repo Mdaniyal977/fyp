@@ -33,6 +33,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import axios from 'axios';
 import VoiceInput from '../components/VoiceInput';
 import AISuggestions from '../components/AISuggestions';
+import ATSScoreChecker from '../components/ATSScoreChecker';
 import CVTemplateSelector from '../components/CVTemplateSelector';
 import CVPreview from '../components/CVPreview';
 import CVCustomization from '../components/CVCustomization';
@@ -988,6 +989,7 @@ const CVEditor = () => {
           <Grid item xs={12} md={4}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <CVCustomization customization={customization} onChange={setCustomization} />
+              <ATSScoreChecker cvContent={cv} />
               <AISuggestions cvContent={cv} />
             </Box>
           </Grid>
