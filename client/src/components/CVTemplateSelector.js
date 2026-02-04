@@ -137,6 +137,30 @@ const templates = {
       color: '#1e40af',
       preview: 'academic',
     },
+    {
+      id: 'sidebar-left',
+      name: 'Sidebar Left',
+      description: 'Professional layout with left sidebar for contact & skills',
+      category: 'Professional',
+      color: '#2563eb',
+      preview: 'sidebar',
+    },
+    {
+      id: 'centered-clean',
+      name: 'Centered Clean',
+      description: 'Minimal centered design with elegant spacing',
+      category: 'Professional',
+      color: '#1e293b',
+      preview: 'centered',
+    },
+    {
+      id: 'card-based',
+      name: 'Card Based',
+      description: 'Modern card-based sections with shadows',
+      category: 'Modern',
+      color: '#8b5cf6',
+      preview: 'card',
+    },
   ],
 };
 
@@ -279,6 +303,47 @@ const TemplatePreview = ({ template }) => {
         <Box sx={{ width: '75%', height: 4, bgcolor: '#dbeafe' }} />
       </Box>
     ),
+    sidebar: (
+      <Box sx={{ p: 1, borderRadius: 1, height: '100%', display: 'flex', gap: 0.5 }}>
+        <Box sx={{ width: '35%', bgcolor: '#2563eb', borderRadius: 1, p: 1 }}>
+          <Box sx={{ width: '80%', height: 6, bgcolor: 'white', borderRadius: 1, mb: 0.5, mx: 'auto' }} />
+          <Box sx={{ width: '60%', height: 3, bgcolor: 'rgba(255,255,255,0.8)', borderRadius: 1, mx: 'auto', mb: 1 }} />
+          <Box sx={{ width: '90%', height: 2, bgcolor: 'rgba(255,255,255,0.6)', borderRadius: 1, mx: 'auto', mb: 0.5 }} />
+          <Box sx={{ width: '90%', height: 2, bgcolor: 'rgba(255,255,255,0.6)', borderRadius: 1, mx: 'auto' }} />
+        </Box>
+        <Box sx={{ flex: 1, bgcolor: 'white', borderRadius: 1, p: 1 }}>
+          <Box sx={{ width: '100%', height: 4, bgcolor: '#2563eb', borderRadius: 1, mb: 0.5 }} />
+          <Box sx={{ width: '90%', height: 3, bgcolor: '#e5e7eb', borderRadius: 1, mb: 0.5 }} />
+          <Box sx={{ width: '85%', height: 3, bgcolor: '#e5e7eb', borderRadius: 1 }} />
+        </Box>
+      </Box>
+    ),
+    centered: (
+      <Box sx={{ p: 2, borderRadius: 1, height: '100%', bgcolor: 'white', textAlign: 'center' }}>
+        <Box sx={{ width: 50, height: 50, borderRadius: '50%', bgcolor: '#1e293b', mx: 'auto', mb: 1 }} />
+        <Box sx={{ width: '60%', height: 4, bgcolor: '#1e293b', mx: 'auto', mb: 0.5 }} />
+        <Box sx={{ width: '40%', height: 3, bgcolor: '#64748b', mx: 'auto', mb: 2 }} />
+        <Box sx={{ width: '70%', height: 2, bgcolor: '#e5e7eb', mx: 'auto', mb: 1 }} />
+        <Box sx={{ width: '50%', height: 3, bgcolor: '#f1f5f9', mx: 'auto', mb: 0.5 }} />
+        <Box sx={{ width: '50%', height: 3, bgcolor: '#f1f5f9', mx: 'auto' }} />
+      </Box>
+    ),
+    card: (
+      <Box sx={{ p: 1.5, borderRadius: 1, height: '100%', bgcolor: '#f8fafc' }}>
+        <Box sx={{ bgcolor: '#8b5cf6', borderRadius: 1, p: 1, mb: 0.5 }}>
+          <Box sx={{ width: '70%', height: 4, bgcolor: 'white', borderRadius: 1, mx: 'auto', mb: 0.5 }} />
+          <Box sx={{ width: '50%', height: 2, bgcolor: 'rgba(255,255,255,0.8)', borderRadius: 1, mx: 'auto' }} />
+        </Box>
+        <Box sx={{ bgcolor: 'white', borderRadius: 1, p: 0.75, mb: 0.5, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+          <Box sx={{ width: '100%', height: 2, bgcolor: '#8b5cf6', borderRadius: 0.5, mb: 0.5 }} />
+          <Box sx={{ width: '90%', height: 2, bgcolor: '#e5e7eb', borderRadius: 0.5 }} />
+        </Box>
+        <Box sx={{ bgcolor: 'white', borderRadius: 1, p: 0.75, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+          <Box sx={{ width: '100%', height: 2, bgcolor: '#8b5cf6', borderRadius: 0.5, mb: 0.5 }} />
+          <Box sx={{ width: '85%', height: 2, bgcolor: '#e5e7eb', borderRadius: 0.5 }} />
+        </Box>
+      </Box>
+    ),
   };
 
   return previews[template.preview] || previews.modern;
@@ -287,7 +352,7 @@ const TemplatePreview = ({ template }) => {
 const CVTemplateSelector = ({ open, onClose, onSelect, selectedTemplate }) => {
   const [category, setCategory] = React.useState('all');
 
-  const categories = ['all', 'Professional', 'IT', 'Creative', 'Marketing', 'Student'];
+  const categories = ['all', 'Professional', 'IT', 'Creative', 'Marketing', 'Student', 'Modern'];
 
   const filteredTemplates = category === 'all' 
     ? templates.all 

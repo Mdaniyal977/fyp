@@ -40,7 +40,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+import { getApiUrl } from '../utils/apiUrl';
 
 const CVEditor = () => {
   const { id } = useParams();
@@ -125,7 +125,7 @@ const CVEditor = () => {
 
   const fetchCV = async () => {
     try {
-      const response = await axios.get(`${API_URL}/cv/${id}`);
+      const response = await axios.get(`${getApiUrl()}/cv/${id}`);
       const cvData = response.data;
       
       // Normalize array fields to ensure they are arrays (not null/undefined)
@@ -197,7 +197,7 @@ const CVEditor = () => {
     try {
       // Check if server is accessible
       try {
-        await axios.get(`${API_URL.replace('/api', '')}/api/health`);
+        await axios.get(`${getApiUrl().replace('/api', '')}/api/health`);
       } catch (healthError) {
         alert('Server is not running. Please start the backend server:\n\ncd server\nnpm run dev\n\nOr run: npm run dev from project root');
         setSaving(false);
@@ -220,9 +220,9 @@ const CVEditor = () => {
       };
 
       if (id) {
-        await axios.put(`${API_URL}/cv/${id}`, cvToSave, config);
+        await axios.put(`${getApiUrl()}/cv/${id}`, cvToSave, config);
       } else {
-        const response = await axios.post(`${API_URL}/cv`, cvToSave, config);
+        const response = await axios.post(`${getApiUrl()}/cv`, cvToSave, config);
         // MySQL returns 'id', not '_id'
         const cvId = response.data.id || response.data._id;
         navigate(`/cv/${cvId}`);

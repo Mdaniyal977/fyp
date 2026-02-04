@@ -25,16 +25,22 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import DescriptionIcon from '@mui/icons-material/Description';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+import { getApiUrl } from '../utils/apiUrl';
+import { exportCVToPDF } from '../utils/pdfExport';
+import { exportCVToDOCX } from '../utils/docxExport';
+import CVPreview from '../components/CVPreview';
 
 const Dashboard = () => {
   const [cvs, setCvs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedCv, setSelectedCv] = useState(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewCv, setPreviewCv] = useState(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -44,7 +50,7 @@ const Dashboard = () => {
 
   const fetchCVs = async () => {
     try {
-      const response = await axios.get(`${API_URL}/cv`);
+      const response = await axios.get(`${getApiUrl()}/cv`);
       setCvs(response.data);
     } catch (error) {
       console.error('Error fetching CVs:', error);
@@ -56,7 +62,7 @@ const Dashboard = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this CV?')) {
       try {
-        await axios.delete(`${API_URL}/cv/${id}`);
+        await axios.delete(`${getApiUrl()}/cv/${id}`);
         setCvs(cvs.filter(cv => (cv.id || cv._id) !== id));
       } catch (error) {
         console.error('Error deleting CV:', error);
@@ -73,7 +79,7 @@ const Dashboard = () => {
       delete cvData.id;
       delete cvData._id;
       cvData.title = `${cv.title} (Copy)`;
-      const response = await axios.post(`${API_URL}/cv`, cvData);
+      const response = await axios.post(`${getApiUrl()}/cv`, cvData);
       fetchCVs();
       navigate(`/cv/${response.data.id || response.data._id}`);
     } catch (error) {
@@ -96,6 +102,41 @@ const Dashboard = () => {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleDownloadPDF = async (cv) => {
+    setPreviewCv(cv);
+    setPreviewOpen(true);
+    // Wait for dialog to render, then export
+    setTimeout(async () => {
+      const cvElement = document.getElementById('cv-preview-content');
+      if (cvElement) {
+        const result = await exportCVToPDF(cvElement, cv?.title || 'CV');
+        if (result.success) {
+          // Close preview after successful export
+          setTimeout(() => {
+            setPreviewOpen(false);
+            setPreviewCv(null);
+          }, 500);
+        } else {
+          alert('Failed to download PDF: ' + result.error);
+          setPreviewOpen(false);
+          setPreviewCv(null);
+        }
+      } else {
+        setPreviewOpen(false);
+        setPreviewCv(null);
+      }
+    }, 1000);
+  };
+
+  const handleDownloadDOCX = async (cv) => {
+    const result = await exportCVToDOCX(cv, cv?.title || 'CV');
+    if (result.success) {
+      alert('DOCX downloaded successfully!');
+    } else {
+      alert('Failed to download DOCX: ' + result.error);
+    }
   };
 
   if (loading) {
@@ -313,17 +354,42 @@ const Dashboard = () => {
                           )}
                         </Box>
                       </CardContent>
-                      <CardActions sx={{ p: 2, pt: 0 }}>
+                      <CardActions sx={{ p: 2, pt: 0, gap: 1 }}>
                         <Button
                           size="small"
                           startIcon={<EditIcon />}
                           onClick={() => navigate(`/cv/${cvId}`)}
-                          fullWidth
                           variant="contained"
-                          sx={{ borderRadius: 2, py: 1, fontWeight: 600 }}
+                          sx={{ flex: 1, borderRadius: 2, py: 1, fontWeight: 600 }}
                         >
-                          Edit CV
+                          Edit
                         </Button>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDownloadPDF(cv)}
+                          sx={{ 
+                            color: 'error.main',
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            '&:hover': { bgcolor: 'error.light', color: 'white' }
+                          }}
+                          title="Download PDF"
+                        >
+                          <PictureAsPdfIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDownloadDOCX(cv)}
+                          sx={{ 
+                            color: 'info.main',
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            '&:hover': { bgcolor: 'info.light', color: 'white' }
+                          }}
+                          title="Download DOCX"
+                        >
+                          <DescriptionIcon fontSize="small" />
+                        </IconButton>
                       </CardActions>
                     </Card>
                   </Grid>
@@ -371,6 +437,20 @@ const Dashboard = () => {
           Delete
         </MenuItem>
       </Menu>
+
+      {/* Preview Dialog for PDF Export */}
+      {previewCv && (
+        <CVPreview
+          cv={previewCv}
+          open={previewOpen}
+          onClose={() => {
+            setPreviewOpen(false);
+            setPreviewCv(null);
+          }}
+          template={previewCv.template || 'modern'}
+          customization={previewCv.customization}
+        />
+      )}
     </Box>
   );
 };

@@ -17,6 +17,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { exportCVToPDF } from '../utils/pdfExport';
 import { exportCVToDOCX } from '../utils/docxExport';
+import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
@@ -69,6 +70,12 @@ const CVPreview = ({ cv, open, onClose, template = 'modern', customization }) =>
         return <BoldTemplate cv={cv} customization={currentCustomization} />;
       case 'academic':
         return <AcademicTemplate cv={cv} customization={currentCustomization} />;
+      case 'sidebar-left':
+        return <SidebarLeftTemplate cv={cv} customization={currentCustomization} />;
+      case 'centered-clean':
+        return <CenteredCleanTemplate cv={cv} customization={currentCustomization} />;
+      case 'card-based':
+        return <CardBasedTemplate cv={cv} customization={currentCustomization} />;
       default:
         return <ModernTemplate cv={cv} customization={currentCustomization} />;
     }
@@ -724,5 +731,487 @@ const BoldTemplate = ({ cv, customization }) => (
 const AcademicTemplate = ({ cv, customization }) => (
   <ModernTemplate cv={cv} customization={{ ...customization, headingColor: '#1e40af' }} />
 );
+
+// Template 1: Sidebar Left - Professional Layout
+const SidebarLeftTemplate = ({ cv, customization }) => {
+  const accentColor = customization?.headingColor || '#2563eb';
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        maxWidth: 210 * 3.78,
+        minHeight: 297 * 3.78,
+        mx: 'auto',
+        bgcolor: 'white',
+        display: 'flex',
+      }}
+    >
+      {/* Left Sidebar */}
+      <Box
+        sx={{
+          width: '35%',
+          bgcolor: accentColor,
+          color: 'white',
+          p: 3,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {/* Name & Title */}
+        <Box sx={{ mb: 3 }}>
+          {cv.personalInfo?.photo && (
+            <Box
+              component="img"
+              src={cv.personalInfo.photo}
+              alt="Profile"
+              sx={{
+                width: 120,
+                height: 120,
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '3px solid rgba(255,255,255,0.3)',
+                mb: 2,
+                mx: 'auto',
+                display: 'block',
+              }}
+            />
+          )}
+          <Typography variant="h5" fontWeight={700} gutterBottom align="center">
+            {cv.personalInfo?.fullName || 'Your Name'}
+          </Typography>
+          {cv.personalInfo?.jobTitle && (
+            <Typography variant="body1" align="center" sx={{ opacity: 0.95 }}>
+              {cv.personalInfo.jobTitle}
+            </Typography>
+          )}
+        </Box>
+
+        {/* Contact Info */}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5, textTransform: 'uppercase', letterSpacing: 1 }}>
+            Contact
+          </Typography>
+          {cv.personalInfo?.email && (
+            <Typography variant="body2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <EmailIcon fontSize="small" /> {cv.personalInfo.email}
+            </Typography>
+          )}
+          {cv.personalInfo?.phone && (
+            <Typography variant="body2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <PhoneIcon fontSize="small" /> {cv.personalInfo.phone}
+            </Typography>
+          )}
+          {cv.personalInfo?.address && (
+            <Typography variant="body2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <LocationOnIcon fontSize="small" /> {cv.personalInfo.address}
+            </Typography>
+          )}
+          {cv.personalInfo?.linkedIn && (
+            <Typography variant="body2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <LinkedInIcon fontSize="small" /> {cv.personalInfo.linkedIn}
+            </Typography>
+          )}
+          {cv.personalInfo?.github && (
+            <Typography variant="body2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <GitHubIcon fontSize="small" /> {cv.personalInfo.github}
+            </Typography>
+          )}
+        </Box>
+
+        {/* Skills */}
+        {cv.skills?.length > 0 && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5, textTransform: 'uppercase', letterSpacing: 1 }}>
+              Skills
+            </Typography>
+            {cv.skills.map((skill, idx) => (
+              <Box key={idx} sx={{ mb: 2 }}>
+                <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>
+                  {skill.category}
+                </Typography>
+                {skill.items?.map((item, i) => {
+                  const skillName = typeof item === 'string' ? item : (item.name || '');
+                  const level = typeof item === 'object' && item.level ? item.level : 'intermediate';
+                  const percent = level === 'beginner' ? 25 : level === 'intermediate' ? 50 : level === 'advanced' ? 75 : 100;
+                  return (
+                    <Box key={i} sx={{ mb: 1 }}>
+                      <Typography variant="caption">{skillName}</Typography>
+                      <Box sx={{ height: 4, bgcolor: 'rgba(255,255,255,0.3)', borderRadius: 1, mt: 0.5, overflow: 'hidden' }}>
+                        <Box sx={{ height: '100%', bgcolor: 'white', width: `${percent}%`, borderRadius: 1 }} />
+                      </Box>
+                    </Box>
+                  );
+                })}
+              </Box>
+            ))}
+          </Box>
+        )}
+
+        {/* Languages */}
+        {cv.languages?.length > 0 && (
+          <Box>
+            <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5, textTransform: 'uppercase', letterSpacing: 1 }}>
+              Languages
+            </Typography>
+            {cv.languages.map((lang, idx) => (
+              <Typography key={idx} variant="body2" sx={{ mb: 0.5 }}>
+                {lang.language} - {lang.proficiency}
+              </Typography>
+            ))}
+          </Box>
+        )}
+      </Box>
+
+      {/* Right Main Content */}
+      <Box sx={{ flex: 1, p: 3 }}>
+        {/* Professional Summary */}
+        {cv.professionalSummary && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" fontWeight={700} sx={{ color: accentColor, mb: 1, pb: 0.5, borderBottom: `2px solid ${accentColor}` }}>
+              Professional Summary
+            </Typography>
+            <Typography variant="body2">{cv.professionalSummary}</Typography>
+          </Box>
+        )}
+
+        {/* Work Experience */}
+        {cv.workExperience?.length > 0 && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" fontWeight={700} sx={{ color: accentColor, mb: 1.5, pb: 0.5, borderBottom: `2px solid ${accentColor}` }}>
+              Work Experience
+            </Typography>
+            {cv.workExperience.map((exp, idx) => (
+              <Box key={idx} sx={{ mb: 2 }}>
+                <Typography variant="subtitle1" fontWeight={600}>{exp.position}</Typography>
+                {exp.designation && (
+                  <Chip label={exp.designation} size="small" sx={{ mb: 0.5, bgcolor: `${accentColor}15`, color: accentColor }} />
+                )}
+                <Typography variant="body2" color="text.secondary">{exp.company} | {exp.startDate} - {exp.current ? 'Present' : exp.endDate}</Typography>
+                {exp.description && <Typography variant="body2" sx={{ mt: 0.5 }}>{exp.description}</Typography>}
+              </Box>
+            ))}
+          </Box>
+        )}
+
+        {/* Education */}
+        {cv.education?.length > 0 && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" fontWeight={700} sx={{ color: accentColor, mb: 1.5, pb: 0.5, borderBottom: `2px solid ${accentColor}` }}>
+              Education
+            </Typography>
+            {cv.education.map((edu, idx) => (
+              <Box key={idx} sx={{ mb: 1.5 }}>
+                <Typography variant="subtitle1" fontWeight={600}>{edu.degree}</Typography>
+                <Typography variant="body2" color="text.secondary">{edu.institution} | {edu.startDate} - {edu.endDate}</Typography>
+              </Box>
+            ))}
+          </Box>
+        )}
+
+        {/* Projects */}
+        {cv.projects?.length > 0 && (
+          <Box>
+            <Typography variant="h6" fontWeight={700} sx={{ color: accentColor, mb: 1.5, pb: 0.5, borderBottom: `2px solid ${accentColor}` }}>
+              Projects
+            </Typography>
+            {cv.projects.map((project, idx) => (
+              <Box key={idx} sx={{ mb: 1.5 }}>
+                <Typography variant="subtitle1" fontWeight={600}>{project.name}</Typography>
+                {project.description && <Typography variant="body2">{project.description}</Typography>}
+              </Box>
+            ))}
+          </Box>
+        )}
+      </Box>
+    </Paper>
+  );
+};
+
+// Template 2: Centered Clean - Minimal Design
+const CenteredCleanTemplate = ({ cv, customization }) => {
+  const accentColor = customization?.headingColor || '#1e293b';
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        maxWidth: 210 * 3.78,
+        minHeight: 297 * 3.78,
+        mx: 'auto',
+        p: 5,
+        bgcolor: 'white',
+      }}
+    >
+      {/* Header - Centered */}
+      <Box sx={{ textAlign: 'center', mb: 5, pb: 3, borderBottom: '1px solid #e5e7eb' }}>
+        {cv.personalInfo?.photo && (
+          <Box
+            component="img"
+            src={cv.personalInfo.photo}
+            alt="Profile"
+            sx={{
+              width: 140,
+              height: 140,
+              borderRadius: '50%',
+              objectFit: 'cover',
+              border: '3px solid #f1f5f9',
+              mb: 2,
+              mx: 'auto',
+              display: 'block',
+            }}
+          />
+        )}
+        <Typography variant="h3" fontWeight={300} sx={{ letterSpacing: 3, mb: 1, color: accentColor }}>
+          {cv.personalInfo?.fullName || 'Your Name'}
+        </Typography>
+        {cv.personalInfo?.jobTitle && (
+          <Typography variant="h6" fontWeight={400} sx={{ color: '#64748b', mb: 2 }}>
+            {cv.personalInfo.jobTitle}
+          </Typography>
+        )}
+        <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 2 }}>
+          {cv.personalInfo?.email && <Typography variant="body2" color="text.secondary">{cv.personalInfo.email}</Typography>}
+          {cv.personalInfo?.phone && <Typography variant="body2" color="text.secondary">• {cv.personalInfo.phone}</Typography>}
+          {cv.personalInfo?.address && <Typography variant="body2" color="text.secondary">• {cv.personalInfo.address}</Typography>}
+        </Box>
+      </Box>
+
+      {/* Professional Summary */}
+      {cv.professionalSummary && (
+        <Box sx={{ mb: 4, textAlign: 'center', maxWidth: '80%', mx: 'auto' }}>
+          <Typography variant="body1" sx={{ lineHeight: 1.8, color: '#475569' }}>
+            {cv.professionalSummary}
+          </Typography>
+        </Box>
+      )}
+
+      {/* Sections - Centered with spacing */}
+      {cv.workExperience?.length > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" fontWeight={600} sx={{ color: accentColor, mb: 2, textAlign: 'center', letterSpacing: 1 }}>
+            EXPERIENCE
+          </Typography>
+          {cv.workExperience.map((exp, idx) => (
+            <Box key={idx} sx={{ mb: 3, textAlign: 'center' }}>
+              <Typography variant="h6" fontWeight={500}>{exp.position}</Typography>
+              {exp.designation && <Chip label={exp.designation} size="small" sx={{ my: 0.5 }} />}
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                {exp.company} • {exp.startDate} - {exp.current ? 'Present' : exp.endDate}
+              </Typography>
+              {exp.description && (
+                <Typography variant="body2" sx={{ maxWidth: '70%', mx: 'auto', color: '#64748b' }}>
+                  {exp.description}
+                </Typography>
+              )}
+            </Box>
+          ))}
+        </Box>
+      )}
+
+      {cv.education?.length > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" fontWeight={600} sx={{ color: accentColor, mb: 2, textAlign: 'center', letterSpacing: 1 }}>
+            EDUCATION
+          </Typography>
+          {cv.education.map((edu, idx) => (
+            <Box key={idx} sx={{ mb: 2, textAlign: 'center' }}>
+              <Typography variant="h6" fontWeight={500}>{edu.degree}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {edu.institution} • {edu.startDate} - {edu.endDate}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      )}
+
+      {/* Skills - Horizontal */}
+      {cv.skills?.length > 0 && (
+        <Box sx={{ mb: 4, textAlign: 'center' }}>
+          <Typography variant="h6" fontWeight={600} sx={{ color: accentColor, mb: 2, letterSpacing: 1 }}>
+            SKILLS
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 1 }}>
+            {cv.skills.map((skill) =>
+              skill.items?.map((item, i) => (
+                <Chip
+                  key={i}
+                  label={typeof item === 'string' ? item : item.name}
+                  variant="outlined"
+                  sx={{ borderRadius: 2 }}
+                />
+              ))
+            )}
+          </Box>
+        </Box>
+      )}
+    </Paper>
+  );
+};
+
+// Template 3: Card Based - Modern Design
+const CardBasedTemplate = ({ cv, customization }) => {
+  const accentColor = customization?.headingColor || '#8b5cf6';
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        maxWidth: 210 * 3.78,
+        minHeight: 297 * 3.78,
+        mx: 'auto',
+        p: 3,
+        bgcolor: '#f8fafc',
+      }}
+    >
+      {/* Header Card */}
+      <Box
+        sx={{
+          bgcolor: accentColor,
+          color: 'white',
+          p: 4,
+          borderRadius: 3,
+          mb: 3,
+          textAlign: 'center',
+        }}
+      >
+        {cv.personalInfo?.photo && (
+          <Box
+            component="img"
+            src={cv.personalInfo.photo}
+            alt="Profile"
+            sx={{
+              width: 100,
+              height: 100,
+              borderRadius: '50%',
+              objectFit: 'cover',
+              border: '3px solid rgba(255,255,255,0.3)',
+              mb: 2,
+              mx: 'auto',
+              display: 'block',
+            }}
+          />
+        )}
+        <Typography variant="h4" fontWeight={700} gutterBottom>
+          {cv.personalInfo?.fullName || 'Your Name'}
+        </Typography>
+        {cv.personalInfo?.jobTitle && (
+          <Typography variant="h6" sx={{ opacity: 0.95, mb: 2 }}>
+            {cv.personalInfo.jobTitle}
+          </Typography>
+        )}
+        <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 2 }}>
+          {cv.personalInfo?.email && <Typography variant="body2">{cv.personalInfo.email}</Typography>}
+          {cv.personalInfo?.phone && <Typography variant="body2">{cv.personalInfo.phone}</Typography>}
+        </Box>
+      </Box>
+
+      {/* Professional Summary Card */}
+      {cv.professionalSummary && (
+        <Box
+          sx={{
+            bgcolor: 'white',
+            p: 3,
+            borderRadius: 2,
+            mb: 2,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          }}
+        >
+          <Typography variant="h6" fontWeight={600} sx={{ color: accentColor, mb: 1 }}>
+            Professional Summary
+          </Typography>
+          <Typography variant="body2">{cv.professionalSummary}</Typography>
+        </Box>
+      )}
+
+      {/* Work Experience Cards */}
+      {cv.workExperience?.length > 0 && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="h6" fontWeight={600} sx={{ color: accentColor, mb: 1.5, px: 1 }}>
+            Work Experience
+          </Typography>
+          {cv.workExperience.map((exp, idx) => (
+            <Box
+              key={idx}
+              sx={{
+                bgcolor: 'white',
+                p: 2.5,
+                borderRadius: 2,
+                mb: 2,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                borderLeft: `4px solid ${accentColor}`,
+              }}
+            >
+              <Typography variant="subtitle1" fontWeight={600}>{exp.position}</Typography>
+              {exp.designation && <Chip label={exp.designation} size="small" sx={{ my: 0.5, bgcolor: `${accentColor}15`, color: accentColor }} />}
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                {exp.company} • {exp.startDate} - {exp.current ? 'Present' : exp.endDate}
+              </Typography>
+              {exp.description && <Typography variant="body2">{exp.description}</Typography>}
+            </Box>
+          ))}
+        </Box>
+      )}
+
+      {/* Education Cards */}
+      {cv.education?.length > 0 && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="h6" fontWeight={600} sx={{ color: accentColor, mb: 1.5, px: 1 }}>
+            Education
+          </Typography>
+          {cv.education.map((edu, idx) => (
+            <Box
+              key={idx}
+              sx={{
+                bgcolor: 'white',
+                p: 2.5,
+                borderRadius: 2,
+                mb: 2,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                borderLeft: `4px solid ${accentColor}`,
+              }}
+            >
+              <Typography variant="subtitle1" fontWeight={600}>{edu.degree}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {edu.institution} • {edu.startDate} - {edu.endDate}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      )}
+
+      {/* Skills Card */}
+      {cv.skills?.length > 0 && (
+        <Box
+          sx={{
+            bgcolor: 'white',
+            p: 3,
+            borderRadius: 2,
+            mb: 2,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          }}
+        >
+          <Typography variant="h6" fontWeight={600} sx={{ color: accentColor, mb: 1.5 }}>
+            Skills
+          </Typography>
+          {cv.skills.map((skill, idx) => (
+            <Box key={idx} sx={{ mb: 1.5 }}>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                {skill.category}
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+                {skill.items?.map((item, i) => (
+                  <Chip
+                    key={i}
+                    label={typeof item === 'string' ? item : item.name}
+                    size="small"
+                    sx={{ bgcolor: `${accentColor}15`, color: accentColor }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      )}
+    </Paper>
+  );
+};
 
 export default CVPreview;

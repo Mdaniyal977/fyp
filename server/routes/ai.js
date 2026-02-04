@@ -63,62 +63,90 @@ router.post('/analyze', auth, async (req, res) => {
       });
     }
 
-    const prompt = `Analyze this CV content and provide specific suggestions for improvement. Focus on:
-1. Better wording and professional language
-2. Industry-relevant keywords
-3. Missing information that should be included
-4. Formatting and structure improvements
-5. Quantifiable achievements
+    // Extract key CV sections for analysis
+    const summary = cvContent.professionalSummary || '';
+    const workExp = Array.isArray(cvContent.workExperience) ? cvContent.workExperience : [];
+    const education = Array.isArray(cvContent.education) ? cvContent.education : [];
+    const skills = Array.isArray(cvContent.skills) ? cvContent.skills : [];
+    const projects = Array.isArray(cvContent.projects) ? cvContent.projects : [];
+    const personalInfo = cvContent.personalInfo || {};
+    
+    const prompt = `You are a professional CV/resume advisor. Analyze this CV and provide specific, actionable suggestions.
 
-CV Content:
-${JSON.stringify(cvContent, null, 2)}
+CV Details:
+- Name: ${personalInfo.fullName || 'Not provided'}
+- Job Title: ${personalInfo.jobTitle || 'Not provided'}
+- Professional Summary: ${summary.substring(0, 200)}${summary.length > 200 ? '...' : ''}
+- Work Experience: ${workExp.length} position(s)
+- Education: ${education.length} entry/entries
+- Skills: ${skills.length} category/categories
+- Projects: ${projects.length} project(s)
 
-Provide your analysis in JSON format with the following structure:
+Analyze and provide suggestions focusing on:
+1. Professional Summary: Is it compelling? Does it highlight key strengths?
+2. Work Experience: Are achievements quantified? Are action verbs used?
+3. Skills: Are they relevant? Are they properly categorized?
+4. Missing Information: What important sections or details are missing?
+5. Keywords: What industry-relevant keywords should be added?
+6. Overall Quality: Rate the CV out of 10
+
+Provide your analysis in JSON format ONLY (no markdown, no code blocks):
 {
   "suggestions": [
     {
       "section": "section name",
-      "issue": "what needs improvement",
-      "suggestion": "specific improvement recommendation",
+      "issue": "specific issue found",
+      "suggestion": "detailed improvement recommendation",
       "priority": "high/medium/low"
     }
   ],
   "missingInfo": ["list of missing information"],
   "keywords": ["suggested industry keywords"],
-  "overallScore": "score out of 10"
+  "overallScore": "X/10"
 }`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
-        { role: "system", content: "You are a professional CV/resume advisor. Provide constructive, specific feedback." },
+        { role: "system", content: "You are a professional CV/resume advisor. Always respond with valid JSON only, no markdown code blocks, no explanations. Provide constructive, specific feedback." },
         { role: "user", content: prompt }
       ],
       temperature: 0.7,
-      max_tokens: 1500
+      max_tokens: 2000,
+      response_format: { type: "json_object" }
     });
 
     let analysis;
     try {
-      const content = completion.choices[0].message.content;
+      const content = completion.choices[0].message.content.trim();
       // Try to parse JSON, handle if it's wrapped in markdown code blocks
+      let jsonString = content;
       const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/);
-      const jsonString = jsonMatch ? jsonMatch[1] : content;
+      if (jsonMatch) {
+        jsonString = jsonMatch[1].trim();
+      }
+      // Remove any leading/trailing non-JSON text
+      const jsonStart = jsonString.indexOf('{');
+      const jsonEnd = jsonString.lastIndexOf('}');
+      if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+        jsonString = jsonString.substring(jsonStart, jsonEnd + 1);
+      }
       analysis = JSON.parse(jsonString);
     } catch (parseError) {
       console.error('Error parsing AI response:', parseError);
+      console.error('Raw content:', completion.choices[0].message.content);
       // Return structured response even if parsing fails
       analysis = {
         suggestions: [
           {
             section: 'General',
             issue: 'AI response parsing error',
-            suggestion: 'Review your CV content and ensure all sections are complete with professional language.',
+            suggestion: 'Review your CV content and ensure all sections are complete with professional language. Use action verbs and quantify achievements.',
             priority: 'medium'
           }
         ],
         missingInfo: [],
-        keywords: ['professional', 'experience', 'skills'],
+        keywords: ['professional', 'experience', 'skills', 'leadership', 'management'],
         overallScore: '7/10'
       };
     }

@@ -18,7 +18,7 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+import { getApiUrl } from '../utils/apiUrl';
 
 const AISuggestions = ({ cvContent, text, context }) => {
   const [loading, setLoading] = useState(false);
@@ -36,7 +36,7 @@ const AISuggestions = ({ cvContent, text, context }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `${API_URL}/ai/analyze`,
+        `${getApiUrl()}/ai/analyze`,
         { cvContent: cvContent },
         {
           headers: {
@@ -128,7 +128,7 @@ const AISuggestions = ({ cvContent, text, context }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `${API_URL}/ai/improve-text`,
+        `${getApiUrl()}/ai/improve-text`,
         {
           text,
           context: context || 'CV section'
